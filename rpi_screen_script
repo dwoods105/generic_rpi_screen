@@ -1,0 +1,24 @@
+#!/bin/bash
+cd /boot
+echo "dwc_otg.lpm_enable=0 console=tty1 console=ttyAMA0,115200 root=/dev/mmcblk0p2 rootfstype=ext4 elevator=deadline rootwait fbcon=map:10 fbcon=font:ProFont6x11 logo.nologo">>cmdline.txt
+echo "dtparam=audio=on
+dtparam=spi=on
+dtoverlay=ads7846,penirq=25,penirq_pull=2,xohms=150,swapxy=1,xmin=300,ymin=700,xmax=3800,ymax=3400,pmax=255
+dtoverlay=waveshare35a">>config.txt
+sudo git clone https://github.com/swkim01/waveshare-dtoverlays.git
+sudo cp waveshare-dtoverlays/waveshare35a-overlay.dtb /boot/overlays/waveshare35a.dtbo
+echo "Section "Device"
+Identifier "Allwinner A10/A13 FBDEV"
+Driver "fbturbo"
+Option "fbdev" "/dev/fb1"
+
+Option "SwapbuffersWait" "true"
+EndSection"<</usr/share/X11/xorg.conf.d/99-fbturbo.conf
+cd /etc/X11/xorg.conf.d
+echo "Section "InputClass"
+Identifier "calibration"
+MatchProduct "ADS7846 Touchscreen"
+Option "Calibration" "3932 300 294 3801"
+Option "SwapAxes" "1"
+EndSection"<<99-calibration.conf
+reboot
